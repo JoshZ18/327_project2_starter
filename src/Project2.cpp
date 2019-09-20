@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
 	test_system();
 	remove_file_debris();
 
-	string studentname = "Your";
+	string studentname = "Josh Zutell";
 	if (argc == 2) {
 		//a command line param was passed in,
 		//my script will pass in the student ID
