@@ -45,13 +45,12 @@ int getArraySize() {
 			size++;
 		}
 	}
+
 	return size;
 }
 
 //get data at a particular location
 std::string getArrayWordAt(int i) {
-	std::cout << "Word= " << words[i].wrd;
-
 	return words[i].wrd;
 }
 
@@ -98,24 +97,18 @@ void processLine(std::string &myString) {
 			wrd = "";
 		}
 		else {
-			wrd += myString.substr(i, i+1);
+			wrd+=letter;
+		}
+	}
+
+	if (wrd.length() != 0) {
+		if (strip_unwanted_chars(wrd)) {
+			line[entry] = wrd;
+			entry++;
 		}
 	}
 
 	int lineLen = sizeof(line)/sizeof(line[0]);
-
-//	int size = 0;
-//	for (int i = 0; i < lineLen; i++) {
-//		if (line[i] != "\0") {
-//			size++;
-//		}
-//	}
-//
-//	std::cout << "Size=" << size;
-//
-//	for (int i = 0; i < size; i++) {
-//		std::cout << line[i] << " ";
-//	}
 
 	for (int i = 0; i < lineLen; i++) {
 		processToken(line[i]);
@@ -153,14 +146,6 @@ void processToken(std::string &token) {
 		first_occur.occur = 1;
 		words[slot] = first_occur;
 		slot++;
-
-//		if (slot == sizeof(words)) {
-//			struct word temp[slot];
-//			for (int i = 0; i < length; i++) {
-//				temp[i] = words[i];
-//			}
-////			words = temp;
-//		}
 	}
 }
 
@@ -189,15 +174,17 @@ int writeArraytoFile(const std::string &outputfilename) {
 	using namespace std;
 	using namespace constants;
 
-	if (sizeof(words) == 0) {
+	if (getArraySize() == 0) {
 		return FAIL_NO_ARRAY_DATA;
 	}
 
 	ofstream myEntryArray;
-	myEntryArray.open(outputfilename.c_str());
+	myEntryArray.open(outputfilename.c_str(), std::ofstream::out | std::ofstream::trunc);
 
 	if (myEntryArray.is_open()) {
-		myEntryArray << words;
+		for (int i = 0; i < getArraySize(); i++) {
+			myEntryArray << words[i].wrd << " " << words[i].occur << "\n";
+		}
 		myEntryArray.close();
 		return SUCCESS;
 	}
@@ -220,7 +207,12 @@ void sortArray(constants::sortOrder so) {
 	case (ASCENDING):
 		for (int i = 0; i < length - 1; i++) {
 			for (int j = 0; j < length - i - 1; j++) {
-				if (words[j].wrd > words[j+1].wrd) {
+				std::string tempWord1 = words[j].wrd;
+			    toUpper(tempWord1);
+				std::string tempWord2 = words[j+1].wrd;
+				toUpper(tempWord2);
+
+				if (tempWord1 > tempWord2) {
 					struct word temp;
 					temp.wrd = words[j].wrd;
 					temp.occur = words[j].occur;
