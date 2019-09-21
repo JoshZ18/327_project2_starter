@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <string.h>
+
 #include "array_functions.h"
 #include "utilities.h"
 #include "constants.h"
@@ -26,7 +27,7 @@ struct word {
 	int occur;
 };
 
-struct word words[1000];
+struct word words[50];
 int slot = 0;
 
 //zero out array that tracks words and their occurrences
@@ -80,7 +81,7 @@ bool processFile(std::fstream &myfstream) {
 feed each token to processToken for recording*/
 void processLine(std::string &myString) {
 	std::string wrd = "";
-	std::string line[1000];
+	std::string line[50];
 	int entry = 0;
 
 	int length = myString.length();
@@ -161,6 +162,7 @@ bool openFile(std::fstream& myfile, const std::string& myFileName,
 /*iff myfile is open then close it*/
 void closeFile(std::fstream& myfile) {
 	if (myfile.is_open()) {
+
 		myfile.close();
 	}
 }
@@ -179,7 +181,7 @@ int writeArraytoFile(const std::string &outputfilename) {
 	}
 
 	ofstream myEntryArray;
-	myEntryArray.open(outputfilename.c_str(), std::ofstream::out | std::ofstream::trunc);
+	myEntryArray.open(outputfilename.c_str());
 
 	if (myEntryArray.is_open()) {
 		for (int i = 0; i < getArraySize(); i++) {
