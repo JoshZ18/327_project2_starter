@@ -45,13 +45,13 @@ int getArraySize() {
 			size++;
 		}
 	}
-
-	std::cout << size;
 	return size;
 }
 
 //get data at a particular location
 std::string getArrayWordAt(int i) {
+	std::cout << "Word= " << words[i].wrd;
+
 	return words[i].wrd;
 }
 
@@ -80,65 +80,88 @@ bool processFile(std::fstream &myfstream) {
 /*take 1 line and extract all the tokens from it
 feed each token to processToken for recording*/
 void processLine(std::string &myString) {
-//	std::string wrd = "";
-//	std::string line[100];
-//	int slot = 0;
-//
-//	int length = myString.length();
-//
-//	for (int i = 0; i < length; i++) {
-//		if (myString.substr(i, i+1) == " ") {
-//			line[slot] = wrd;
-//			slot++;
-//			if (slot == sizeof(line)) {
-//				std::string temp[slot];
-//				for (int i = 0; i < sizeof(line); i++) {
-//					temp[i] = line[i];
-//				}
-//			}
-//			wrd = "";
-//		}
-//		else {
-//			wrd += myString.substr(i, i+1);
-//		}
-//	}
-//
-//	int lineLen = sizeof(line);
-//
+	std::string wrd = "";
+	std::string line[1000];
+	int entry = 0;
+
+	int length = myString.length();
+
+	for (int i = 0; i < length; i++) {
+		std::string letter = myString.substr(i, 1);
+		if (letter == " ") {
+
+			if (strip_unwanted_chars(wrd)) {
+				line[entry] = wrd;
+				entry++;
+			}
+
+			wrd = "";
+		}
+		else {
+			wrd += myString.substr(i, i+1);
+		}
+	}
+
+	int lineLen = sizeof(line)/sizeof(line[0]);
+
+//	int size = 0;
 //	for (int i = 0; i < lineLen; i++) {
-//		processToken(line[i]);
+//		if (line[i] != "\0") {
+//			size++;
+//		}
 //	}
+//
+//	std::cout << "Size=" << size;
+//
+//	for (int i = 0; i < size; i++) {
+//		std::cout << line[i] << " ";
+//	}
+
+	for (int i = 0; i < lineLen; i++) {
+		processToken(line[i]);
+	}
 }
 
 /*Keep track of how many times each token seen*/
 void processToken(std::string &token) {
 
-//	bool first = true;
-//	int length = sizeof(words);
+	if (!strip_unwanted_chars(token)) {
+		return;
+	}
 
-//	for (int i = 0; i < length; i++) {
-//		if (toUpper(token) == toUpper(words[i].wrd)) {
-//			words[i].occur += 1;
-//			first = false;
-//			break;
-//		}
-//	}
+	bool first = true;
+	int length = sizeof(words) / sizeof(words[0]);
+	strip_unwanted_chars(token);
 
-//	if (first) {
-//		struct word first_occur;
-//		first_occur.wrd = token;
-//		first_occur.occur = 1;
-//		words[index] = first_occur;
-//		index++;
-//
-//		if (index == sizeof(words)) {
-//			struct word temp[index];
+	for (int i = 0; i < length; i++) {
+		std::string tempToken = token;
+		std::string tempWord = words[i].wrd;
+
+		toUpper(tempToken);
+		toUpper(tempWord);
+
+		if (tempToken == tempWord) {
+			words[i].occur += 1;
+			first = false;
+			break;
+		}
+	}
+
+	if (first) {
+		struct word first_occur;
+		first_occur.wrd = token;
+		first_occur.occur = 1;
+		words[slot] = first_occur;
+		slot++;
+
+//		if (slot == sizeof(words)) {
+//			struct word temp[slot];
 //			for (int i = 0; i < length; i++) {
 //				temp[i] = words[i];
 //			}
 ////			words = temp;
 //		}
-//	}
+	}
 }
 
 /*if you are debugging the file must be in the project parent directory
@@ -189,53 +212,57 @@ int writeArraytoFile(const std::string &outputfilename) {
  * The presence of the enum implies a switch statement based on its value
  */
 void sortArray(constants::sortOrder so) {
-//	using namespace constants;
-//	using namespace std;
-//	switch (so) {
-//	case (ASCENDING):
-//		for (int i = 0; i < sizeof(words) - 1; i++) {
-//			for (int j = 0; j < sizeof(words) - i - 1; j++) {
-//				if (words[j].wrd > words[j+1].wrd) {
-//					struct word temp;
-//					temp.wrd = words[j].wrd;
-//					temp.occur = words[j].occur;
-//
-//					words[j] = words[j+1];
-//					words[j+1] = temp;
-//				}
-//			}
-//		}
-//		break;
-//	case (DESCENDING):
-//		for (int i = sizeof(words) - 1; i < 0; i--) {
-//			for (int j = sizeof(words) - i - 1; j < 0; j--) {
-//				if (words[j].wrd < words[j-1].wrd) {
-//					struct word temp;
-//					temp.wrd = words[j].wrd;
-//					temp.occur = words[j].occur;
-//
-//					words[j] = words[j-1];
-//					words[j-1] = temp;
-//				}
-//			}
-//		}
-//		break;
-//	case (NUMBER_OCCURRENCES):
-//		for (int i = 0; i < sizeof(words) - 1; i++) {
-//			for (int j = 0; j < sizeof(words) - i - 1; j++) {
-//				if (words[j].occur < words[j+1].occur) {
-//					struct word temp;
-//					temp.wrd = words[j].wrd;
-//					temp.occur = words[j].occur;
-//
-//					words[j] = words[j+1];
-//					words[j+1] = temp;
-//				}
-//			}
-//		}
-//		break;
-//	default:
-//		break;
-//	}
+	using namespace constants;
+	using namespace std;
+
+	int length = getArraySize();
+	switch (so) {
+	case (ASCENDING):
+		for (int i = 0; i < length - 1; i++) {
+			for (int j = 0; j < length - i - 1; j++) {
+				if (words[j].wrd > words[j+1].wrd) {
+					struct word temp;
+					temp.wrd = words[j].wrd;
+					temp.occur = words[j].occur;
+
+					words[j].wrd = words[j+1].wrd;
+					words[j].occur = words[j+1].occur;
+					words[j+1].wrd = temp.wrd;
+					words[j+1].occur = temp.occur;
+				}
+			}
+		}
+		break;
+	case (DESCENDING):
+		for (int i = length - 1; i < 0; i--) {
+			for (int j = length - i - 1; j < 0; j--) {
+				if (words[j].wrd < words[j-1].wrd) {
+					struct word temp;
+					temp.wrd = words[j].wrd;
+					temp.occur = words[j].occur;
+
+					words[j] = words[j-1];
+					words[j-1] = temp;
+				}
+			}
+		}
+		break;
+	case (NUMBER_OCCURRENCES):
+		for (int i = 0; i < length - 1; i++) {
+			for (int j = 0; j < length - i - 1; j++) {
+				if (words[j].occur < words[j+1].occur) {
+					struct word temp;
+					temp.wrd = words[j].wrd;
+					temp.occur = words[j].occur;
+
+					words[j] = words[j+1];
+					words[j+1] = temp;
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }
 
